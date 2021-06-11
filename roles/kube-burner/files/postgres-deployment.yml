@@ -1,36 +1,27 @@
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  name: postgres-{{.Replica}}-{{.Iteration}}
+  name: nginx-{{.Replica}}-{{.Iteration}}
 spec:
   template:
     metadata:
       labels:
-        name: postgres-{{.Replica}}-{{.Iteration}}
+        name: nginx-{{.Iteration}}
     spec:
       nodeSelector:
         {{.nodeSelectorKey}}: {{.nodeSelectorValue}}
       containers:
-      - name: postgresql
-        image: registry.redhat.io/rhscl/postgresql-10-rhel7:latest
+      - name: nginx
+        image: quay.io/openshift-scale/nginx
         ports:
-        - containerPort: 5432
+        - containerPort: 80
           protocol: TCP
-        env:
-        - name: POSTGRESQL_USER
-          value: admin
-        - name: POSTGRESQL_PASSWORD
-          value: secret
-        - name: POSTGRESQL_DATABASE
-          value: node-density
         imagePullPolicy: IfNotPresent
-        securityContext:
-          privileged: false
       restartPolicy: Always
   replicas: 1
   selector:
     matchLabels:
-      name: postgres-{{.Replica}}-{{.Iteration}}
+      name: nginx-{{.Iteration}}
   triggers:
   - type: ConfigChange
   strategy:

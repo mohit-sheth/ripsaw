@@ -57,6 +57,10 @@
           suuid: "{{ trunc_uuid }}"
           metadata: "not collected"
           cerberus: "not connected"
+
+    - debug:
+        msg: "{{ cr_state.resources[0].status }}"
+
     
     when: workload is defined and (cr_state.resources[0].status is not defined or cr_state.resources[0].status.uuid is not defined)
 

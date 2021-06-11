@@ -115,10 +115,10 @@
         data:
           config.yml: "{{ lookup('template', 'max-namespaces.yml.j2')}}"
           metrics.yaml: "{{ lookup('file', workload_args.metrics_profile|default('metrics-aggregated.yaml')) }}"
-          app-deployment.yml: "{{ lookup('file', 'app-deployment.yml')}}"
           postgres-deployment.yml: "{{ lookup('file', 'postgres-deployment.yml')}}"
-          postgres-service.yml: "{{ lookup('file', 'postgres-service.yml')}}"
-          secret.yml: "{{ lookup('file', 'secret.yml')}}"
+          networkpolicy-ingress.yaml: "{{ lookup('file', 'networkpolicy-ingress.yaml')}}"
+          networkpolicy-monitoring.yaml: "{{ lookup('file', 'networkpolicy-monitoring.yaml')}}"
+          networkpolicy-same-ns.yaml: "{{ lookup('file', 'networkpolicy-same-ns.yaml')}}"
     when: workload_args.workload == "max-namespaces"
 
   - name: Create max-services configmaps

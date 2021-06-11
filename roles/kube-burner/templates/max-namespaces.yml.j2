@@ -15,34 +15,30 @@ global:
 
 jobs:
   - name: max-namespaces
-    jobIterations: {{ workload_args.job_iterations }}
-    qps: {{ workload_args.qps|default(5) }}
-    burst: {{ workload_args.burst|default(10) }}
+    jobIterations: {{ workload_args.job_iterations|default(400) }}
+    qps: {{ workload_args.qps|default(20) }}
+    burst: {{ workload_args.burst|default(20) }}
     namespacedIterations: true
     namespace: max-namespaces-{{ uuid }}
     podWait: {{ workload_args.pod_wait|default(false) }}
-    cleanup: {{ workload_args.cleanup|default(true) }}
+    cleanup: {{ workload_args.cleanup|default(false) }}
     waitWhenFinished: {{ workload_args.wait_when_finished|default(true) }}
     verifyObjects: {{ workload_args.verify_objects|default(true) }}
     errorOnVerify: {{ workload_args.error_on_verify|default(false) }}
     objects:
 
-      - objectTemplate: postgres-deployment.yml
-        replicas: 1
+      - objectTemplate: postgres-deployment.yml 
+        replicas: {{ workload_args.replicas|default(5) }}
         inputVars:
           nodeSelectorKey: {{ workload_args.node_selector.key|default("node-role.kubernetes.io/worker") }}
           nodeSelectorValue: "{{ workload_args.node_selector.value|default("") }}"
 
-      - objectTemplate: app-deployment.yml
-        replicas: 5
-        inputVars:
-          readinessPeriod: 10
-          livenessPeriod: 10
-          nodeSelectorKey: {{ workload_args.node_selector.key|default("node-role.kubernetes.io/worker") }}
-          nodeSelectorValue: "{{ workload_args.node_selector.value|default("") }}"
-
-      - objectTemplate: postgres-service.yml
+      - objectTemplate: networkpolicy-ingress.yaml
         replicas: 1
 
-      - objectTemplate: secret.yml
-        replicas: 10
+      - objectTemplate: networkpolicy-monitoring.yaml
+        replicas: 1
+
+      - objectTemplate: networkpolicy-same-ns.yaml
+        replicas: 1
+
