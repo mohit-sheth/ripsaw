@@ -28,6 +28,8 @@ function populate_test_list {
     if [[ $(echo ${item} | grep 'roles/scale_openshift') ]]; then echo "test_scale_openshift.sh" >> tests/iterate_tests; fi
     if [[ $(echo ${item} | grep 'roles/kube-burner') ]]; then echo "test_kubeburner.sh" >> tests/iterate_tests; fi
     if [[ $(echo ${item} | grep 'roles/flent') ]]; then echo "test_flent.sh" >> tests/iterate_tests; fi
+    if [[ $(echo ${item} | grep 'roles/log_generator') ]]; then echo "test_log_generator.sh" >> tests/iterate_tests; fi
+    if [[ $(echo ${item} | grep 'roles/image_pull') ]]; then echo "test_image_pull.sh" >> tests/iterate_tests; fi
 
 
     # Check for changes in cr files
@@ -47,6 +49,8 @@ function populate_test_list {
     if [[ $(echo ${item} | grep 'valid_scale*') ]]; then echo "test_scale_openshift.sh" >> tests/iterate_tests; fi
     if [[ $(echo ${item} | grep 'valid_kube-burner*') ]]; then echo "test_kubeburner.sh" >> tests/iterate_tests; fi
     if [[ $(echo ${item} | grep 'valid_flent*') ]]; then echo "test_flent.sh" >> tests/iterate_tests; fi
+    if [[ $(echo ${item} | grep 'valid_log_generator*') ]]; then echo "test_log_generator.sh" >> tests/iterate_tests; fi
+    if [[ $(echo ${item} | grep 'valid_image_pull*') ]]; then echo "test_image_pull.sh" >> tests/iterate_tests; fi
 
 
     # Check for changes in test scripts
@@ -61,6 +65,7 @@ function wait_clean {
   then
     kubectl delete benchmarks -n my-ripsaw --all --ignore-not-found
   fi
+  kubectl delete -f deploy/25_role.yaml -f deploy/35_role_binding.yaml --ignore-not-found
   kubectl delete namespace my-ripsaw --ignore-not-found
 }
 
@@ -210,7 +215,7 @@ function cleanup_operator_resources {
 
 function update_operator_image {
   tag_name="${NODE_NAME:-master}"
-  if operator-sdk build $image_location/$image_account/benchmark-operator:$tag_name --image-builder podman; then
+  if podman build -f build/Dockerfile -t $image_location/$image_account/benchmark-operator:$tag_name .; then
   # In case we have issues uploading to quay we will retry a few times
     for i in {1..3}; do
       podman push $image_location/$image_account/benchmark-operator:$tag_name && break
@@ -263,9 +268,7 @@ function error {
 
   echo "Error caught. Dumping logs before exiting"
   echo "Benchmark operator Logs"
-  kubectl -n my-ripsaw logs --tail=40 -l name=benchmark-operator -c benchmark-operator
-  echo "Ansible sidecar Logs"
-  kubectl -n my-ripsaw logs -l name=benchmark-operator -c ansible
+  kubectl -n my-ripsaw logs --tail=200 -l name=benchmark-operator -c benchmark-operator
 }
 
 function wait_for_backpack() {

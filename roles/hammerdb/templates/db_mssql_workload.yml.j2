@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: "job"
 metadata:
-  name: "{{ meta.name }}-workload-{{ trunc_uuid }}"
+  name: "{{ ansible_operator_meta.name }}-workload-{{ trunc_uuid }}"
   namespace: "{{ operator_namespace }}"
 spec:
   ttlSecondsAfterFinished: 600
@@ -10,12 +10,27 @@ spec:
     metadata:
       labels:
         app: hammerdb_workload-{{ trunc_uuid }}
+        type: {{ ansible_operator_meta.name }}-bench-workload-{{ trunc_uuid }}
+        benchmark-operator-uuid: {{ uuid }}
     spec:
+{% if workload_args.pin is sameas true %}
+      nodeSelector:
+        kubernetes.io/hostname: '{{ workload_args.pin_node }}'
+{% endif %}
 {% if workload_args.runtime_class is defined %}
       runtimeClassName: "{{ workload_args.runtime_class }}"
 {% endif %}
       containers:
       - name: hammerdb
+{% if workload_args.resources is sameas true %}
+        resources:
+          requests:
+            cpu: {{ workload_args.requests_cpu | default("200m") }}
+            memory: {{ workload_args.requests_memory | default("100Mi") }}
+          limits:
+            cpu: {{ workload_args.limits_cpu }}
+            memory: {{ workload_args.limits_memory }}
+{% endif %}
         image: {{ workload_args.image | default('quay.io/cloud-bulldozer/hammerdb:master') }}
         imagePullPolicy: Always
         env:
@@ -76,6 +91,13 @@ spec:
              export db_mssql_bucket={{workload_args.db_mssql_bucket}};
              export db_mssql_durability={{workload_args.db_mssql_durability}};
              export db_mssql_checkpoint={{workload_args.db_mssql_checkpoint}};
+{% if workload_args.es_custom_field is sameas true %}
+             export es_ocp_version={{workload_args.es_ocp_version}};
+             export es_cnv_version={{workload_args.es_cnv_version}};
+             export es_db_version={{workload_args.es_db_version}};
+             export es_os_version={{workload_args.es_os_version}};
+             export es_kind={{workload_args.es_kind}};
+{% endif %}
              cd /hammer;
              run_snafu --tool hammerdb -u {{ uuid }}"
         volumeMounts:
@@ -85,7 +107,7 @@ spec:
       volumes:
       - name: hammerdb-workload-volume
         configMap:
-          name: "{{ meta.name }}-workload-{{ trunc_uuid }}"
+          name: "{{ ansible_operator_meta.name }}-workload-{{ trunc_uuid }}"
           defaultMode: 0640
       restartPolicy: OnFailure
 {% include "metadata.yml.j2" %}

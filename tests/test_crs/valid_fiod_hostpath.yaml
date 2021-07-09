@@ -4,6 +4,12 @@ metadata:
   name: example-benchmark
   namespace: my-ripsaw
 spec:
+  system_metrics:
+    collection: true
+    prom_url: https://prometheus-k8s.openshift-monitoring.svc.cluster.local:9091
+    es_url: ES_SERVER
+    prom_token: PROMETHEUS_TOKEN
+    metrics_profile: node-metrics.yml
   elasticsearch:
     url: ES_SERVER
     index_name: ripsaw-fio
@@ -36,6 +42,7 @@ spec:
       write_ramp_time: 1
       filesize: 10MiB
       log_sample_rate: 2000
+      debug: true
 #######################################
 #  EXPERT AREA - MODIFY WITH CAUTION  #
 #######################################

@@ -39,7 +39,7 @@ helm delete benchmark-operator -n my-ripsaw --purge
 | [Pgbench](docs/pgbench.md)     | Postgres Performance   | Yes            |  Used, default : 3second  | Not Supported          | Preview         | Yes |
 | [Smallfile](docs/smallfile.md) | Storage IO Performance | Yes            |  Used, default : 3second  | Not Supported          | Preview         | Yes |
 | [fs-drift](docs/fs-drift.md)   | Storage IO Longevity   | Yes            |  Not used                 | Not Supported          | Preview         | Yes |
-| [hammerdb](docs/hammerdb.md)   | Database Performance   | Yes            |  Used, default : 3second  | Not Supported          | Preview         | Yes |
+| [hammerdb](docs/hammerdb.md)   | Database Performance   | Yes            |  Used, default : 3second  |  Working                | Preview         | Yes |
 | [Service Mesh](docs/servicemesh.md) | Microservices     | No            |  Used, default : 3second   | Not Supported         | Preview         | No |
 | [Vegeta](docs/vegeta.md)       | HTTP Performance       | Yes            |  Used, default : 3second  | Not Supported          | Preview         | Yes |
 | [Scale Openshift](docs/scale_openshift.md) | Scale Openshift Cluster       | Yes            |  Used, default : 3second  | Not Supported         | Preview        | Yes |
@@ -49,6 +49,8 @@ helm delete benchmark-operator -n my-ripsaw --purge
 | [oslat](docs/oslat.md)         | Real-Time Latency      | Yes           |  Used, default : 3second   | Not Supported          | Preview         | No |
 | [testpmd](docs/testpmd.md)         | TestPMD DPDK App      | No           |  Used   | Not Supported          | Preview         | No |
 | [Flent](docs/flent.md)         | Network Performance    | Yes           |  Used, default : 3second  | Not Supported          | Not Supported   | Yes |
+| [Log-Generator](docs/log_generator.md)         | Log Throughput to Backend    | Yes           |  Used, default : 3second  | Not Supported          | Yes  | Yes |
+| [Image-Pull](docs/image_pull.md)         | Time to Pull Image from Container Repo    | Yes           |  Used, default : 3second  | Not Supported          | Yes  | Yes |
 
 ### Reconciliation
 
@@ -83,6 +85,32 @@ spec:
     name: "foo"
     args:
       image: my.location/foo:latest
+```
+
+## Optional debug out for benchmark-wrapper workloads
+Workloads that are triggered through [benchmark-wrapper](https://github.com/cloud-bulldozer/benchmark-wrapper)
+can optionally pass the debug flag through the workload CR.
+
+NOTE: This is not a required arguement. If omitted it will default to the default logging level of 
+the benchmark-wrapper
+
+For Example:
+
+```
+apiVersion: ripsaw.cloudbulldozer.io/v1alpha1
+kind: Benchmark
+metadata:
+  name: example-benchmark
+  namespace: my-ripsaw
+spec:
+  elasticsearch:
+    url: "http://my-es.foo.bar:80"
+  metadata_collection: true
+  cleanup: false
+  workload:
+    name: snafu_workload
+    args:
+      debug: true
 ```
 
 ## User Provided UUID

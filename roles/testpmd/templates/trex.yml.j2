@@ -47,10 +47,9 @@ spec:
       terminationGracePeriodSeconds: 10
       containers:
       - name: trex
-        command: ["/bin/sh"]
+        command: ["/bin/sh", "-c"]
         args:
-        - "-c"
-        - "run_snafu --tool trex --uuid {{ trunc_uuid }} --user {{ test_user | default('snafu') }}"
+        - run_snafu --tool trex --uuid {{ trunc_uuid }} --user {{ test_user | default('snafu') }} {% if workload_args.debug is defined and workload_args.debug %} -v {% endif %};
         image: "{{ workload_args.image_trex | default('quay.io/cloud-bulldozer/trex:latest') }}"
         imagePullPolicy: "{{ workload_args.image_pull_policy | default('Always') }}"
         securityContext:
@@ -78,6 +77,8 @@ spec:
         volumeMounts:
         - name: hugepage
           mountPath: /dev/hugepages
+        - name: modules
+          mountPath: /lib/modules
         env:
         - name: CLUSTERNAME
           value: "{{ clustername }}"        
@@ -133,6 +134,9 @@ spec:
       - name: hugepage
         emptyDir:
           medium: HugePages
+      - name: modules
+        hostPath:
+          path: /lib/modules
       restartPolicy: OnFailure
       serviceAccountName: benchmark-operator
 {% include "metadata.yml.j2" %}

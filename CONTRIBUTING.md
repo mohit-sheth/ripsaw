@@ -37,14 +37,6 @@ In the interactive rebase screen, set the first commit to `pick` and all others 
 
 Push your rebased commits (you may need to force), then issue your PR.
 
-## Container Images
-
-Custom container image definitions are maintained in [magazine](https://github.com/cloud-bulldozer/magazine).
-We use quay for all storing all our custom container images, and if you're adding a new
-workload and not sure of where to add/maintain the container image. We highly recommend, to
-add the Dockerfile to magazine, as we've automation setup for updating images in Quay, when
-a git push happens to magazine.
-
 ## Add workload
 
 Adding new workloads are always welcome, but before you submit PR:
@@ -112,7 +104,7 @@ to [uperf](docs/uperf.md)
 * Add the link for your workload guide to [installation guide](docs/installation.md#running-workloads)
 * Ensure all resources created are within the `my-ripsaw` namespace, this can be done by setting namespace
 to use `operator_namespace` var. This is to ensure that the resources aren't defaulted to current active
-namespace which is what `meta.namespace` would default to.
+namespace which is what `ansible_operator_meta.namespace` would default to.
 * All resources created as part of your role should use `trunc_uuid` ansible var in their names and labels, so
 for example [fio-client job template](roles/fio-distributed/templates/client.yaml) has the name `fio-client` and label `app: fiod-client`, instead we'll append the var `trunc_uuid` to both
 the name and label so it'll be `fio-client-{{ trunc_uuid }}` and label would be `app:fiod-client-{{ trunc_uuid }}`. The reason for this
@@ -129,11 +121,12 @@ case of failure or when disabled. This ensures no interference with subsequent w
 
 ### The operator container image
 Any changes to the [roles](roles/) tree or to the [playbook](playbook.yml) file will necessitate a new build of the operator container image.
-The container is built using the [Operator SDK](https://github.com/operator-framework/operator-sdk) and pushed to a public repository.
+The benchmark-operator container can be built using [podman](https://podman.io/) and pushed to a public repository.
 The public repository could be [quay](https://quay.io) in which case you'll need to:
 
 ```bash
-$ operator-sdk build quay.io/<username>/benchmark-operator:testing --image-builder podman 
+$ podman build -f build/Dockerfile -t quay.io/<username>/benchmark-operator:testing .
+
 $ podman push quay.io/<username>/benchmark-operator:testing
 ```
 

@@ -4,6 +4,12 @@ metadata:
   name: hammerdb
   namespace: my-ripsaw
 spec:
+  system_metrics:
+    collection: true
+    prom_url: https://prometheus-k8s.openshift-monitoring.svc.cluster.local:9091
+    es_url: ES_SERVER
+    prom_token: PROMETHEUS_TOKEN
+    metrics_profile: node-metrics.yml
   elasticsearch:
     url: ES_SERVER
     index_name: ripsaw-hammerdb
@@ -12,7 +18,7 @@ spec:
   workload:
     name: "hammerdb"
     args:
-      # image: "quay.io/mkarg/hammerdb:latest"
+      # image: "quay.io/test/hammerdb:latest"
       db_type: "mssql"
       timed_test: true
       test_type: "tpc-c"
@@ -61,3 +67,4 @@ spec:
       db_postgresql_dritasnap: "false"
       db_postgresql_oracompat: "false"
       db_postgresql_storedprocs: "false"
+      debug: true
